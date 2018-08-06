@@ -148,7 +148,7 @@ size_t zcread(zc_t *zc, void *dst, size_t len)
 int main(int argc, char *argv[])
 {
 	if(argc > 1 && strcmp(argv[1], "-h") == 0) {
-		fprintf(isatty(fileno(stdout)) ? stdout : stderr,
+		fprintf(isatty(fileno(stdout)) ? stderr : stdout,
 			"\n"
 			"  zc -- minimal gzcat\n"
 			"    please visit https://github.com/ocxtal/zc for more information\n"
