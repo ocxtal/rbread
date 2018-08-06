@@ -130,23 +130,24 @@ void zcclose(zc_t *zc)
 static _force_inline
 size_t zcread(zc_t *zc, void *dst, size_t len)
 {
-	size_t rem = len;
 	if(zc->eof > 1) { return(0); }
+	size_t rem = len;
+	uint8_t *p = dst;
 
 	/* flush remaining content in buffer */
 	size_t hlen = MIN2(rem, zc->len - zc->head);
-	memcpy(&dst[len - rem], &zc->buf[zc->head], hlen);
+	memcpy(&p[len - rem], &zc->buf[zc->head], hlen);
 	rem -= hlen; zc->head += hlen;
 
 	while(zc->eof < 2 && rem > zc->bulk_thresh) {
-		rem -= zc->read(zc, &dst[len - rem], rem);
+		rem -= zc->read(zc, &p[len - rem], rem);
 		if(zc->eof == 1 && zc->zs.avail_in == 0) { zc->eof = 2; }
 	}
 	while(zc->eof < 2 && rem > 0) {
 		zc->len = zc->read(zc, zc->buf, zc->bulk_size);
 		zc->head = 0;
 		size_t tlen = MIN2(rem, zc->len - zc->head);
-		memcpy(dst, &zc->buf[zc->head], tlen);
+		memcpy(p, &zc->buf[zc->head], tlen);
 		rem -= tlen; zc->head += tlen;
 		if(zc->eof == 1 && zc->head == zc->len) { zc->eof = 2; }
 	}
