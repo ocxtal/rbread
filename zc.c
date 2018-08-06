@@ -157,16 +157,24 @@ int main(int argc, char *argv[])
 		return(0);
 	}
 
+	int ret = 1;
 	size_t const buf_size = ZC_BUF_SIZE;
 	uint8_t *buf = malloc(buf_size);
 	for(char *const *p = &argv[1]; *p != NULL; p++) {
 		zc_t *zc = zcopen(*p);
+		if(zc == NULL) {
+			fprintf(stderr, "failed to open file `%s'\n", *p);
+			goto _main_error;
+		}
 		while(zceof(zc) == 0) {
 			fwrite(buf, 1, zcread(zc, buf, buf_size), stdout);
 		}
 		zcclose(zc);
 	}
-	return(0);
+	ret = 0;
+_main_error:;
+	free(buf);
+	return(ret);
 }
 
 /* end of zc.c */
