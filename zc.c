@@ -20,7 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <zlib.h>
+// #include <zlib.h>
+#include "miniz.h"
 
 #define _force_inline		inline
 #define MIN2(x,y) 			( (x) < (y) ? (x) : (y) )
