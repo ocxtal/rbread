@@ -60,7 +60,7 @@ size_t zc_read_inflate(zc_t *zc, void *dst, size_t len)
 		zc->zs.next_in = p;
 
 		/* fill */
-		zc->zs.avail_in += fread(zc->zs.next_in, sizeof(char), len, zc->fp);
+		zc->zs.avail_in += fread((void *)zc->zs.next_in, sizeof(char), len, zc->fp);
 		if(feof(zc->fp)) { zc->eof = 1; }
 	}
 	zc->zs.next_out = dst;
