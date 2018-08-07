@@ -18,33 +18,38 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "zc.h"
+#include "rbread.h"
 
 int main(int argc, char *argv[])
 {
 	if(argc > 1 && strcmp(argv[1], "-h") == 0) {
 		fprintf(isatty(fileno(stdout)) ? stderr : stdout,
 			"\n"
-			"  zc -- minimal gzcat\n"
-			"    please visit https://github.com/ocxtal/zc for more information\n"
+			"  scat -- minimal gzcat\n"
+			"    please visit https://github.com/ocxtal/rbread for more information\n"
 			"\n"
 		);
 		return(0);
 	}
 
+	if(argc == 1) {
+		fprintf(stderr, "input from stdin is not supported.\n");
+		return(1);
+	}
+
 	int ret = 1;
-	size_t const buf_size = ZC_BUF_SIZE;
+	size_t const buf_size = RB_BUF_SIZE;
 	uint8_t *buf = malloc(buf_size);
 	for(char *const *p = &argv[1]; *p != NULL; p++) {
-		zc_t *zc = zcopen(*p);
-		if(zc == NULL) {
+		rbread_t *rb = rbopen(*p);
+		if(rb == NULL) {
 			fprintf(stderr, "failed to open file `%s'\n", *p);
 			goto _main_error;
 		}
-		while(zceof(zc) == 0) {
-			fwrite(buf, 1, zcread(zc, buf, buf_size), stdout);
+		while(rbeof(rb) == 0) {
+			fwrite(buf, 1, rbread(rb, buf, buf_size), stdout);
 		}
-		zcclose(zc);
+		rbclose(rb);
 	}
 	ret = 0;
 _main_error:;
