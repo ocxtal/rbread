@@ -25,5 +25,6 @@ int dump_file(char const *filename, FILE *out)
 
 # License
 
-Copyright 2018, Hajime Suzuki
 MIT
+
+Copyright (2018), Hajime Suzuki
