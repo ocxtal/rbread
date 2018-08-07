@@ -15,10 +15,10 @@ int dump_file(char const *filename, FILE *out)
 	if(rb == NULL) { return(1); }
 	while(rbeof(rb) == 0) {
 		size_t read = rbread(rb, buf, buf_size);
-		fwrite(buf, 1, read, stdout);
+		fwrite(buf, 1, read, out);
 	}
 	rbclose(rb);
-	fflush(stdout);
+	fflush(out);
 	return(0);
 }
 ```
