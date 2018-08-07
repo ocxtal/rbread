@@ -23,7 +23,7 @@ int dump_file(char const *filename, FILE *out)
 }
 ```
 
-# License
+## License
 
 MIT
 
