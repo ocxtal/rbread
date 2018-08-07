@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 		}
 		rbclose(rb);
 	}
+	fflush(stdout);
 	ret = 0;
 _main_error:;
 	free(buf);
