@@ -187,8 +187,10 @@ void zcclose(zc_t *zc)
 {
 	if(zc->read == zc_read_gzip) {
 		deflateEnd(&zc->s.z);
-	} if(zc->read == zc_read_bz2) {
+	} else if(zc->read == zc_read_bz2) {
 		BZ2_bzDecompressEnd(&zc->s.b);
+	} else if(zc->read == zc_read_xz) {
+		lzma_end(&zc->s.x);
 	}
 	free(zc->buf);  free(zc->ibuf);
 	fclose(zc->fp); free(zc);
