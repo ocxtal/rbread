@@ -144,7 +144,8 @@ rbread_t *rbopen(char const *fn)
 	static struct { uint64_t magic, mask; } const x[4] = {
 		{ 0x000000088b1fULL, 0x000000ffffffULL },		/* gzip */
 		{ 0x000000685a42ULL, 0x000000ffffffULL },		/* bz2 */
-		{ 0x005a587a37fdULL, 0xffffffffffffULL }		/* lzma */
+		{ 0x005a587a37fdULL, 0xffffffffffffULL },		/* lzma */
+		{ 0, 0 }										/* sentinel */
 	};
 
 	/* determine file type; FIXME: refactor redundant code */
@@ -159,15 +160,13 @@ rbread_t *rbopen(char const *fn)
 		if(!(_body)) { goto _rbopen_fail; } \
 	}
 	if(rlen >= sizeof(uint64_t)) {
-		uint64_t h = _rb_loadu_u64(buf);
-		for(uint64_t i = 0; x[i].magic != 0; i++) {
-			if((h & x[i].mask) != x[i].magic) { continue; }
-			switch(i) {
-				case 0: _rb_init(gzip, z, uint8_t, ({ inflateInit2(&rb->s.z, 15 + 16) == Z_OK; })); break;
-				case 1: _rb_init(bz2,  b, char,    ({ BZ2_bzDecompressInit(&rb->s.b, 0, 0) == BZ_OK; })); break;
-				case 2: _rb_init(xz,   x, uint8_t, ({ lzma_stream_decoder(&rb->s.x, UINT64_MAX, LZMA_CONCATENATED) == LZMA_OK; })); break;
-				default: break;
-			}
+		uint64_t h = _rb_loadu_u64(buf), i = 0;
+		while((h & x[i].mask) != x[i].magic) { i++; }
+		switch(i) {
+			case 0: _rb_init(gzip, z, uint8_t, ({ inflateInit2(&rb->s.z, 15 + 16) == Z_OK; })); break;
+			case 1: _rb_init(bz2,  b, char,    ({ BZ2_bzDecompressInit(&rb->s.b, 0, 0) == BZ_OK; })); break;
+			case 2: _rb_init(xz,   x, uint8_t, ({ lzma_stream_decoder(&rb->s.x, UINT64_MAX, LZMA_CONCATENATED) == LZMA_OK; })); break;
+			default: break;
 		}
 	}
 	#undef _rb_init
