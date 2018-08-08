@@ -114,7 +114,7 @@ size_t rbread(rbread_t *rb, void *dst, size_t len)
 		rb->len = rb->read(rb, rb->buf, rb->bulk_size);
 		rb->head = 0;
 		size_t tlen = rb_min2(rem, rb->len - rb->head);
-		memcpy(p, &rb->buf[rb->head], tlen);
+		memcpy(&p[len - rem], &rb->buf[rb->head], tlen);
 		rem -= tlen; rb->head += tlen;
 		if(rb->eof == 1 && rb->head == rb->len) { rb->eof = 2; }
 	}
