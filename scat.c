@@ -14,6 +14,7 @@
 #if defined(__darwin__) && !defined(_DARWIN_C_FULL)
 #  define _DARWIN_C_SOURCE		_DARWIN_C_FULL
 #endif
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
