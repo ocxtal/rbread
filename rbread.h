@@ -31,7 +31,7 @@ typedef struct rbread_s {
 	FILE *fp;
 	uint8_t *ibuf, *buf;	/* input buffer and output buffer; ibuf is unused for transparent mode */
 	size_t head, len;
-	size_t bulk_size, bulk_thresh;
+	size_t bulk_size;
 	uint8_t eof, _pad[7];
 	size_t (*read)(struct rbread_s *, void *, size_t);
 	union {					/* exclusive */
@@ -64,19 +64,20 @@ typedef struct rbread_s {
 _rb_reader(gzip, z, uint8_t, {
 	switch(inflate(&rb->s.z, Z_NO_FLUSH)) {
 		default: rb->eof = 2;
-		case Z_OK: case Z_STREAM_END: break;
+		case Z_STREAM_END: inflateReset(&rb->s.z);
+		case Z_OK: break;
 	}
 });
 _rb_reader(bz2, b, char, {
 	switch(BZ2_bzDecompress(&rb->s.b)) {
 		default: rb->eof = 2;
-		case BZ_OK: case BZ_STREAM_END: break;
+		case BZ_STREAM_END: case BZ_OK: break;
 	}
 });
 _rb_reader(xz, x, uint8_t, {
 	switch(lzma_code(&rb->s.x, rb->eof == 1 ? LZMA_FINISH : LZMA_RUN)) {
 		default: rb->eof = 2;
-		case LZMA_OK: case LZMA_STREAM_END: break;
+		case LZMA_STREAM_END: case LZMA_OK: break;
 	}
 });
 #undef _rb_reader
@@ -105,7 +106,7 @@ size_t rbread(rbread_t *rb, void *dst, size_t len)
 	memcpy(&p[len - rem], &rb->buf[rb->head], hlen);
 	rem -= hlen; rb->head += hlen;
 
-	while(rb->eof < 2 && rem > rb->bulk_thresh) {
+	while(rb->eof < 2 && rem > 2 * rb->bulk_size) {
 		rem -= rb->read(rb, &p[len - rem], rem);
 		if(rb->eof == 1 && rb->s.z.avail_in == 0) { rb->eof = 2; }
 	}
@@ -134,7 +135,6 @@ rbread_t *rbopen(char const *fn)
 	rb->fp = fopen(fn, "rb");							/* always binary read */
 	if(rb->fp == NULL) { goto _rbopen_fail; }
 	rb->bulk_size = RB_BUF_SIZE;
-	rb->bulk_thresh = 2 * rb->bulk_size;
 
 	/* read the first chunk */
 	uint8_t *buf = malloc(2 * rb->bulk_size);
