@@ -179,7 +179,7 @@ rbread_t *rbopen(char const *fn)
 	}
 	return(rb);
 _rbopen_fail:;
-	fclose(rb->fp); free(rb);
+	if(rb->fp) { fclose(rb->fp); } free(rb);
 	return(NULL);
 }
 static inline
